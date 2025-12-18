@@ -1,5 +1,5 @@
 /**
- * @description Abstract base class implementing the Rollup.Evaluator interface for filtering records during rollup
+ * Abstract base class implementing the Rollup.Evaluator interface for filtering records during rollup
  * operations. Provides a framework for evaluating whether individual calc items should be included in rollup
  * calculations based on configurable criteria. The class uses a composite pattern where multiple evaluators can
  * be combined using the CombinedEvaluator, enabling complex filtering logic like WHERE clauses, changed field
@@ -45,7 +45,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
   }
 
   /**
-   * @description Abstract method that subclasses must implement to determine if a calc item matches
+   * Abstract method that subclasses must implement to determine if a calc item matches
    * the evaluator's criteria. Returns true if the item should be included in the rollup calculation.
    * @param calcItem The record (typically an SObject) to evaluate
    * @return True if the item matches the criteria and should be included in the rollup
@@ -53,14 +53,14 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
   public abstract Boolean matches(Object calcItem);
 
   /**
-   * @description Abstract method requiring subclasses to provide a debug-friendly string representation.
+   * Abstract method requiring subclasses to provide a debug-friendly string representation.
    * Used for logging and troubleshooting evaluator behavior.
    * @return String representation of the evaluator's state and configuration
    */
   public abstract override String toString();
 
   /**
-   * @description Factory method that creates or retrieves a cached WhereFieldEvaluator for the given
+   * Factory method that creates or retrieves a cached WhereFieldEvaluator for the given
    * WHERE clause and SObject type. Caching prevents redundant parsing of the same WHERE clause when
    * processing multiple batches of the same rollup configuration.
    * @param calcItemWhereClause The SOQL WHERE clause to parse and evaluate against records
@@ -78,7 +78,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
   }
 
   /**
-   * @description Primary factory method that constructs a complete evaluator chain based on rollup metadata
+   * Primary factory method that constructs a complete evaluator chain based on rollup metadata
    * configuration. Combines multiple evaluation criteria (WHERE clause, changed fields, recursion prevention)
    * into a single composite evaluator using AND logic. If no criteria are specified, returns an AlwaysTrueEvaluator.
    * @param eval Optional user-provided evaluator to include in the chain
@@ -107,7 +107,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
   }
 
   /**
-   * @description Clears all cached evaluation decisions and recursion tracking state. Should be called
+   * Clears all cached evaluation decisions and recursion tracking state. Should be called
    * between transactions or test methods to ensure clean evaluation state. Particularly important when
    * testing recursion scenarios.
    */
@@ -164,7 +164,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
   }
 
   /**
-   * @description Evaluator that checks whether any of the specified fields have changed between old and new
+   * Evaluator that checks whether any of the specified fields have changed between old and new
    * record versions. Used to optimize rollup recalculations by skipping records where rollup-relevant fields
    * haven't changed. Automatically includes the lookup field to detect reparenting scenarios where a record
    * moves from one parent to another.
@@ -174,7 +174,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
     private final Map<Id, SObject> oldRecordsMap;
 
     /**
-     * @description Constructs an evaluator that checks for changes in the specified fields.
+     * Constructs an evaluator that checks for changes in the specified fields.
      * @param changedFieldNames List of field API names to check for changes
      * @param oldRecordsMap Map of record Id to old record version (typically Trigger.oldMap)
      */
@@ -184,7 +184,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
     }
 
     /**
-     * @description Checks if any monitored field value differs between the current record and its prior version.
+     * Checks if any monitored field value differs between the current record and its prior version.
      * For insert operations (no old record), always returns true. Uses field-level comparison to detect changes.
      * @param calcItem The current SObject record to evaluate
      * @return True if any monitored field changed or this is a new record
@@ -293,7 +293,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
   }
 
   /**
-   * @description Evaluator that parses SOQL-like WHERE clauses and evaluates them against in-memory SObjects.
+   * Evaluator that parses SOQL-like WHERE clauses and evaluates them against in-memory SObjects.
    * This enables filtering of calc items without requiring additional database queries. Supports the full range
    * of SOQL comparison operators (=, !=, <, >, LIKE, IN, NOT IN, INCLUDES), AND/OR logic, parenthetical grouping,
    * NOT negation, relationship field traversal, date literals, and date functions.
@@ -318,7 +318,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
     }
 
     /**
-     * @description Constructs a WhereFieldEvaluator by parsing the provided WHERE clause into an evaluation tree.
+     * Constructs a WhereFieldEvaluator by parsing the provided WHERE clause into an evaluation tree.
      * Validates relationship field paths against the schema and extracts field names needed for queries.
      * @param whereClause The SOQL WHERE clause string (without the WHERE keyword)
      * @param calcItemSObjectType The SObject type for schema validation and field lookup
@@ -338,7 +338,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
     }
 
     /**
-     * @description Returns the individual WHERE conditions parsed from the clause. Used by RollupQueryBuilder
+     * Returns the individual WHERE conditions parsed from the clause. Used by RollupQueryBuilder
      * to handle polymorphic field transformations.
      * @return List of individual WHERE condition strings
      */
@@ -347,7 +347,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
     }
 
     /**
-     * @description Returns all field API names referenced in the WHERE clause. Used to ensure required fields
+     * Returns all field API names referenced in the WHERE clause. Used to ensure required fields
      * are included in queries when relationship fields are used in WHERE conditions.
      * @return List of field API names including relationship paths
      */
@@ -356,7 +356,7 @@ public without sharing abstract class RollupEvaluator implements Rollup.Evaluato
     }
 
     /**
-     * @description Evaluates whether the given SObject matches all WHERE clause conditions. Applies AND/OR
+     * Evaluates whether the given SObject matches all WHERE clause conditions. Applies AND/OR
      * logic as specified in the original clause. Non-SObject inputs return false.
      * @param calcItem The record to evaluate against the WHERE conditions
      * @return True if the record satisfies all WHERE clause criteria

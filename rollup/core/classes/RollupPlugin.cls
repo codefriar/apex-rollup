@@ -1,5 +1,5 @@
 /**
- * @description Service class for managing Rollup plugin configuration via custom metadata. Provides access
+ * Service class for managing Rollup plugin configuration via custom metadata. Provides access
  * to RollupPlugin__mdt records which define extensibility points for custom loggers, dispatch handlers,
  * and other behavioral customizations. Supports test mocking to enable unit testing of plugin-dependent code.
  *
@@ -19,7 +19,7 @@ public without sharing class RollupPlugin {
   private static RollupPluginParameter__mdt parameterMock;
 
   /**
-   * @description Retrieves a specific plugin configuration by DeveloperName or Id. Checks mock list first
+   * Retrieves a specific plugin configuration by DeveloperName or Id. Checks mock list first
    * for testability, then falls back to actual metadata query.
    * @param developerNameOrId The plugin's DeveloperName or Id
    * @return The matching RollupPlugin__mdt record, or null if not found
@@ -34,7 +34,7 @@ public without sharing class RollupPlugin {
   }
 
   /**
-   * @description Retrieves all configured plugins, combining actual metadata records with any test mocks.
+   * Retrieves all configured plugins, combining actual metadata records with any test mocks.
    * Used during logger initialization to find all logging plugins.
    * @return List of all RollupPlugin__mdt records
    */
@@ -46,7 +46,7 @@ public without sharing class RollupPlugin {
   }
 
   /**
-   * @description Retrieves a specific plugin parameter configuration. Parameters provide key-value
+   * Retrieves a specific plugin parameter configuration. Parameters provide key-value
    * configuration for plugins (e.g., logging level thresholds, feature flags).
    * @param developerNameOrId The parameter's DeveloperName or Id
    * @return The matching RollupPluginParameter__mdt record
@@ -56,7 +56,7 @@ public without sharing class RollupPlugin {
   }
 
   /**
-   * @description Retrieves all parameters associated with a specific plugin. Filters the global parameter
+   * Retrieves all parameters associated with a specific plugin. Filters the global parameter
    * list to return only those linked to the specified plugin via the RollupPlugin__c relationship.
    * @param pluginId The Id of the parent RollupPlugin__mdt record
    * @return List of RollupPluginParameter__mdt records for this plugin

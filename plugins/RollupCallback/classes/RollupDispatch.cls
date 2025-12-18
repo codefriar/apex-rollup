@@ -1,5 +1,5 @@
 /**
- * @description Plugin that publishes a platform event (RollupCallbackEvent__e) after parent records are updated
+ * Plugin that publishes a platform event (RollupCallbackEvent__e) after parent records are updated
  * by a rollup operation. Enables downstream automation to react to rollup completions, such as triggering
  * additional calculations, notifications, or integrations. The event includes the comma-separated list of
  * updated parent record Ids.
@@ -36,7 +36,7 @@ public class RollupDispatch implements RollupSObjectUpdater.IDispatcher {
   }
 
   /**
-   * @description Called after parent records are updated. If enabled via configuration, publishes a
+   * Called after parent records are updated. If enabled via configuration, publishes a
    * RollupCallbackEvent__e containing the updated record Ids for downstream processing.
    * @param records The list of parent SObject records that were updated by the rollup
    */

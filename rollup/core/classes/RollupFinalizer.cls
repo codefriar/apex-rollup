@@ -1,5 +1,5 @@
 /**
- * @description Finalizer implementation for Queueable-based rollup operations. Provides post-execution handling
+ * Finalizer implementation for Queueable-based rollup operations. Provides post-execution handling
  * for both success and failure scenarios. On success, chains to the next pending "conductor" (batch processor)
  * in the queue. On unhandled exceptions, logs detailed error information including stack traces for debugging.
  *
@@ -25,7 +25,7 @@ public without sharing virtual class RollupFinalizer implements Finalizer {
   protected Boolean hasAlreadyStartedConductor = false;
 
   /**
-   * @description Serialization-safe wrapper for FinalizerContext exception data. The native Exception class
+   * Serialization-safe wrapper for FinalizerContext exception data. The native Exception class
    * cannot be reliably serialized in Apex, so this class extracts the relevant fields into primitive types
    * for logging purposes.
    */
@@ -52,7 +52,7 @@ public without sharing virtual class RollupFinalizer implements Finalizer {
   }
 
   /**
-   * @description Main finalizer execution method called by the platform after Queueable completion.
+   * Main finalizer execution method called by the platform after Queueable completion.
    * Routes to error logging for unhandled exceptions or chains to the next conductor on success.
    * @param fc The FinalizerContext provided by the platform containing execution result and any exception
    */
@@ -72,7 +72,7 @@ public without sharing virtual class RollupFinalizer implements Finalizer {
   }
 
   /**
-   * @description Adds a conductor to the caboose queue. These will execute sequentially after the
+   * Adds a conductor to the caboose queue. These will execute sequentially after the
    * current job completes successfully.
    * @param caboose The RollupAsyncProcessor to queue for later execution
    */

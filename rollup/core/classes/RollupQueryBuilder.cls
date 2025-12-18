@@ -1,5 +1,5 @@
 /**
- * @description Singleton utility class responsible for dynamically constructing SOQL queries for rollup operations.
+ * Singleton utility class responsible for dynamically constructing SOQL queries for rollup operations.
  * Handles complex query requirements including polymorphic field resolution (TYPEOF clauses), multi-currency
  * field inclusion, WHERE clause sanitization, and special handling for Activity objects (Task/Event) which
  * require ALL ROWS to include archived records.
@@ -42,7 +42,7 @@ public without sharing class RollupQueryBuilder {
   }
 
   /**
-   * @description Constructs a complete SOQL query string for fetching rollup-related records. Handles field
+   * Constructs a complete SOQL query string for fetching rollup-related records. Handles field
    * deduplication, multi-currency field injection, polymorphic field TYPEOF conversion, and WHERE clause
    * sanitization. The returned query uses a bind variable (objIds) for the lookup field filter.
    * @param sObjectType The SObject type to query
@@ -100,7 +100,7 @@ public without sharing class RollupQueryBuilder {
   }
 
   /**
-   * @description Overload without optional WHERE clause for simpler query construction.
+   * Overload without optional WHERE clause for simpler query construction.
    * @param sObjectType The SObject type to query
    * @param fieldNames List of field API names to include in SELECT
    * @param lookupFieldOnLookupObject The field to filter on
@@ -112,7 +112,7 @@ public without sharing class RollupQueryBuilder {
   }
 
   /**
-   * @description Ensures Task and Event queries include the ALL ROWS clause to access archived activities.
+   * Ensures Task and Event queries include the ALL ROWS clause to access archived activities.
    * Activities have special archival behavior where older records are moved to archive storage but remain
    * queryable only with ALL ROWS. This method ensures correct positioning of the clause at query end.
    * @param sObjectType The SObject type being queried

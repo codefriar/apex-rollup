@@ -1,5 +1,5 @@
 /**
- * @description Governor limit monitoring utility for rollup operations. Provides proactive limit checking
+ * Governor limit monitoring utility for rollup operations. Provides proactive limit checking
  * to enable graceful degradation to async processing before hitting hard limits. Monitors SOQL queries,
  * query rows, DML rows, CPU time, and org-level async job limits. Configurable thresholds via
  * RollupControl__mdt allow admins to tune behavior based on org-specific patterns.
@@ -52,7 +52,7 @@ public without sharing class RollupLimits {
   }
 
   /**
-   * @description Stateful limit checker that evaluates multiple governor limits at construction time.
+   * Stateful limit checker that evaluates multiple governor limits at construction time.
    * Exposes individual limit flags for granular decision-making and an aggregate hasExceededLimits()
    * for simple go/no-go decisions. Used throughout rollup processing to determine when to defer to
    * async execution or stop processing.
@@ -72,7 +72,7 @@ public without sharing class RollupLimits {
     public final Boolean hasExceededCPUTimeLimit;
 
     /**
-     * @description Constructs a Tester and evaluates all limit conditions. The isRunningAsync flag
+     * Constructs a Tester and evaluates all limit conditions. The isRunningAsync flag
      * determines which timeout interval to use for CPU time checks.
      * @param control The RollupControl__mdt record with configured thresholds
      * @param isRunningAsync True if executing in async context (batch/queueable), affects CPU buffer
@@ -95,7 +95,7 @@ public without sharing class RollupLimits {
     }
 
     /**
-     * @description Returns true if any monitored limit has been exceeded. Use for simple go/no-go
+     * Returns true if any monitored limit has been exceeded. Use for simple go/no-go
      * decisions about whether to continue processing or defer to async.
      * @return True if any limit condition is violated
      */
@@ -104,7 +104,7 @@ public without sharing class RollupLimits {
     }
 
     /**
-     * @description Calculates remaining query rows based on configured maximum. Uses the lower of
+     * Calculates remaining query rows based on configured maximum. Uses the lower of
      * MaxQueryRows__c or the standard 50,000 limit. Negative values indicate the limit is exceeded.
      * @return Number of remaining query rows available, or negative if exceeded
      */
@@ -118,7 +118,7 @@ public without sharing class RollupLimits {
     }
 
     /**
-     * @description Checks if the org has exceeded its daily async Apex job limit. This is an org-wide
+     * Checks if the org has exceeded its daily async Apex job limit. This is an org-wide
      * limit (typically 250,000) that affects all async operations, not just rollups.
      * @return True if the org's daily async job limit has been reached
      */

@@ -1,5 +1,5 @@
 /**
- * @description Extensible logging framework for Rollup operations. Provides hierarchical log level control,
+ * Extensible logging framework for Rollup operations. Provides hierarchical log level control,
  * automatic version tagging, and plugin-based extensibility for custom logging implementations. The default
  * implementation writes to System.debug; custom implementations can persist logs to custom objects, external
  * services, or integrate with logging frameworks like Nebula Logger.
@@ -28,14 +28,14 @@ global without sharing virtual class RollupLogger implements ILogger {
   private final System.LoggingLevel currentLoggingLevel;
 
   /**
-   * @description Default constructor initializes logging level from configuration.
+   * Default constructor initializes logging level from configuration.
    */
   protected RollupLogger() {
     this.currentLoggingLevel = this.getLogLevel();
   }
 
   /**
-   * @description Allows test classes to inject custom logger implementations.
+   * Allows test classes to inject custom logger implementations.
    * @param logger The ILogger implementation to use
    */
   public static void setLogger(ILogger logger) {
@@ -53,14 +53,14 @@ global without sharing virtual class RollupLogger implements ILogger {
   }
 
   /**
-   * @description Marker interface for objects that implement meaningful toString() behavior.
+   * Marker interface for objects that implement meaningful toString() behavior.
    * Objects implementing this interface have their toString() called directly rather than JSON serialization.
    */
   global interface ToStringObject {
   }
 
   /**
-   * @description Core logging interface that all Rollup logger implementations must support.
+   * Core logging interface that all Rollup logger implementations must support.
    * Enables pluggable logging backends while maintaining a consistent API across the application.
    */
   global interface ILogger {
@@ -75,7 +75,7 @@ global without sharing virtual class RollupLogger implements ILogger {
   }
 
   /**
-   * @description Convenience method for logging without an associated object.
+   * Convenience method for logging without an associated object.
    * @param logString The message to log
    * @param logLevel The severity level for this log entry
    */
@@ -84,7 +84,7 @@ global without sharing virtual class RollupLogger implements ILogger {
   }
 
   /**
-   * @description Primary logging method that filters by configured log level before writing.
+   * Primary logging method that filters by configured log level before writing.
    * Only writes if the message level is >= the configured threshold.
    * @param logString The message to log
    * @param logObject Optional context object (Exception, SObject, or any serializable object)
@@ -97,7 +97,7 @@ global without sharing virtual class RollupLogger implements ILogger {
   }
 
   /**
-   * @description Persists any buffered log entries. Default implementation is a no-op since System.debug
+   * Persists any buffered log entries. Default implementation is a no-op since System.debug
    * writes immediately. Override in subclasses that buffer logs for batch persistence.
    */
   @SuppressWarnings('PMD.EmptyStatementBlock')
@@ -106,7 +106,7 @@ global without sharing virtual class RollupLogger implements ILogger {
   }
 
   /**
-   * @description Updates logger configuration from control metadata. Default implementation returns this
+   * Updates logger configuration from control metadata. Default implementation returns this
    * unchanged; override if your logger needs control-specific settings.
    * @param control The RollupControl__mdt record with logging configuration
    * @return This logger instance for method chaining

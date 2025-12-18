@@ -1,5 +1,5 @@
 /**
- * @description Logger plugin that persists rollup log entries to a custom object via platform events.
+ * Logger plugin that persists rollup log entries to a custom object via platform events.
  * Publishes RollupLogEvent__e platform events which are consumed by a trigger to create RollupLog__c records.
  * This provides durable, queryable log storage for production debugging and audit trails.
  *
@@ -23,14 +23,14 @@ public class RollupCustomObjectLogger extends RollupLogger {
   private static final Integer MAX_LENGTH = RollupLogEvent__e.Message__c.getDescribe().getLength();
 
   /**
-   * @description Default constructor initializing the logger with base class configuration.
+   * Default constructor initializing the logger with base class configuration.
    */
   public RollupCustomObjectLogger() {
     super();
   }
 
   /**
-   * @description Publishes all buffered log events to the event bus for async persistence.
+   * Publishes all buffered log events to the event bus for async persistence.
    * Clears the buffer after publishing.
    */
   public override void save() {
@@ -39,7 +39,7 @@ public class RollupCustomObjectLogger extends RollupLogger {
   }
 
   /**
-   * @description Creates a platform event for the log entry and adds it to the buffer.
+   * Creates a platform event for the log entry and adds it to the buffer.
    * Truncates messages exceeding the field length limit to prevent silent publish failures.
    * @param logString The primary log message
    * @param logObject Optional context object for additional details
@@ -63,7 +63,7 @@ public class RollupCustomObjectLogger extends RollupLogger {
   }
 
   /**
-   * @description Returns the parameter name for custom object logger's log level configuration.
+   * Returns the parameter name for custom object logger's log level configuration.
    * @return 'CustomLoggingDebugLevel' - the DeveloperName of the RollupPluginParameter__mdt record
    */
   protected override String getLoggingLevelDeveloperName() {

@@ -1,5 +1,5 @@
 /**
- * @description Utility class for field value initialization and schema operations within the Rollup framework.
+ * Utility class for field value initialization and schema operations within the Rollup framework.
  * Provides sensible default values for all Salesforce field types (crucial for rollup calculations when no
  * records exist), datetime normalization to handle SOQL's millisecond truncation quirk, and picklist ranking
  * logic for MIN/MAX operations where picklist ordering matters.
@@ -39,7 +39,7 @@ public virtual class RollupFieldInitializer {
   }
 
   /**
-   * @description Normalizes a Datetime by removing milliseconds. SOQL truncates milliseconds from returned
+   * Normalizes a Datetime by removing milliseconds. SOQL truncates milliseconds from returned
    * Datetime values, causing comparison failures between queried and programmatically created Datetimes.
    * This method ensures consistent comparison by stripping milliseconds from both sides.
    * @param dt The Datetime to normalize
@@ -51,7 +51,7 @@ public virtual class RollupFieldInitializer {
   }
 
   /**
-   * @description Returns an appropriate default value for the given field type. Used to initialize rollup
+   * Returns an appropriate default value for the given field type. Used to initialize rollup
    * fields when no calc items exist (e.g., all child records deleted). Returns the field's defined default
    * if one exists, otherwise returns a type-appropriate default: 0 for numbers, epoch for dates, empty string
    * for text, first active value for picklists, false for booleans.
@@ -100,7 +100,7 @@ public virtual class RollupFieldInitializer {
   }
 
   /**
-   * @description Retrieves an SObjectField token by name from a field map. Handles the quirk where CMDT
+   * Retrieves an SObjectField token by name from a field map. Handles the quirk where CMDT
    * Entity Definition fields store relationship names without the 'Id' suffix (e.g., 'Account' instead
    * of 'AccountId'), so this method tries both the provided name and name + 'Id'.
    * @param fieldNameToField Map of field API names to SObjectField tokens
@@ -118,7 +118,7 @@ public virtual class RollupFieldInitializer {
   }
 
   /**
-   * @description Retrieves the DescribeSObjectResult for a given SObject name using deferred describe
+   * Retrieves the DescribeSObjectResult for a given SObject name using deferred describe
    * to minimize governor limit consumption.
    * @param sObjectName The API name of the SObject (e.g., 'Account', 'Custom_Object__c')
    * @return The DescribeSObjectResult for the specified object
@@ -128,7 +128,7 @@ public virtual class RollupFieldInitializer {
   }
 
   /**
-   * @description Creates an Id-to-SObject map that safely handles null Ids by filtering them out.
+   * Creates an Id-to-SObject map that safely handles null Ids by filtering them out.
    * The standard Map<Id, SObject> constructor throws an exception if any record has a null Id;
    * this method iterates manually to avoid that issue.
    * @param records List of SObject records to map
@@ -143,7 +143,7 @@ public virtual class RollupFieldInitializer {
   }
 
   /**
-   * @description Specialized controller for picklist field operations including default value retrieval,
+   * Specialized controller for picklist field operations including default value retrieval,
    * rank-based comparisons for MIN/MAX operations, and sorting. Picklist MIN/MAX is determined by the
    * admin-defined picklist order (as shown in Setup), not alphabetical order. This class maintains a
    * rank map based on picklist entry position for accurate comparisons.
@@ -155,7 +155,7 @@ public virtual class RollupFieldInitializer {
     private Map<String, Integer> picklistToRank;
 
     /**
-     * @description Constructs a PicklistController for the specified field. Builds a rank map where each
+     * Constructs a PicklistController for the specified field. Builds a rank map where each
      * picklist value is assigned its position index (0-based) in the picklist definition. Inactive values
      * receive -1 as a sentinel. This ranking enables correct MIN/MAX behavior per Salesforce's picklist
      * ordering semantics.
@@ -197,7 +197,7 @@ public virtual class RollupFieldInitializer {
     }
 
     /**
-     * @description Returns the first active picklist value as the default, or delegates to the parent
+     * Returns the first active picklist value as the default, or delegates to the parent
      * class for non-picklist fields.
      * @param field The field to get the default value for
      * @return The first active picklist value, or parent class default for non-picklist fields
@@ -207,7 +207,7 @@ public virtual class RollupFieldInitializer {
     }
 
     /**
-     * @description Indicates whether this controller is managing a picklist field.
+     * Indicates whether this controller is managing a picklist field.
      * @return True if the field is a picklist or multi-select picklist
      */
     public Boolean isPicklist() {
@@ -215,7 +215,7 @@ public virtual class RollupFieldInitializer {
     }
 
     /**
-     * @description Indicates whether this controller is managing a multi-select picklist field.
+     * Indicates whether this controller is managing a multi-select picklist field.
      * @return True if the field is a multi-select picklist
      */
     public Boolean isMultiSelectPicklist() {
@@ -223,7 +223,7 @@ public virtual class RollupFieldInitializer {
     }
 
     /**
-     * @description Compares two picklist values for MIN/MAX operations using rank-based ordering.
+     * Compares two picklist values for MIN/MAX operations using rank-based ordering.
      * Returns true if picklistVal should replace comparisonValue based on the operation type.
      * For unknown values not in the picklist, falls back to string comparison.
      * @param picklistVal The candidate value to evaluate
@@ -245,7 +245,7 @@ public virtual class RollupFieldInitializer {
     }
 
     /**
-     * @description Returns the rank (position index) of a picklist value. Unknown values receive
+     * Returns the rank (position index) of a picklist value. Unknown values receive
      * a sentinel value appropriate for the operation (max for MIN ops, min for MAX ops).
      * @param picklistVal The picklist value to get the rank for
      * @param operation The rollup operation to determine sentinel value
@@ -256,7 +256,7 @@ public virtual class RollupFieldInitializer {
     }
 
     /**
-     * @description Sorts a list of picklist values by their admin-defined order (not alphabetically).
+     * Sorts a list of picklist values by their admin-defined order (not alphabetically).
      * @param picklistValues The list of values to sort in place
      */
     public void sort(List<String> picklistValues) {
