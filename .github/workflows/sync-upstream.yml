@@ -1,0 +1,146 @@
+name: Sync Upstream and Build Packages
+
+on:
+  schedule:
+    # Run daily at 2am UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual trigger
+
+jobs:
+  sync-and-build:
+    runs-on: ubuntu-22.04
+    environment: Test
+    steps:
+      - name: 'Checkout source code'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Configure Git'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 'Add upstream remote'
+        run: |
+          git remote add upstream https://github.com/jamessimone/apex-rollup.git || true
+          git fetch upstream
+
+      - name: 'Check for upstream changes'
+        id: check-changes
+        run: |
+          # Get the merge base between our main and upstream/main
+          MERGE_BASE=$(git merge-base HEAD upstream/main)
+          UPSTREAM_HEAD=$(git rev-parse upstream/main)
+
+          if [ "$MERGE_BASE" = "$UPSTREAM_HEAD" ]; then
+            echo "No upstream changes to sync"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Upstream has changes to sync"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 'Merge upstream changes'
+        id: merge
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          # Attempt to merge upstream/main
+          # If there are conflicts, the merge will fail and the workflow will stop
+          # allowing developers to manually resolve
+          git merge upstream/main --no-edit
+          echo "merge_success=true" >> $GITHUB_OUTPUT
+
+      - name: 'Transform package names with vacatia- prefix'
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.merge.outputs.merge_success == 'true'
+        run: |
+          # Transform sfdx-project.json to prepend 'vacatia-' to package names
+          jq '
+            # Function to prepend vacatia- if not already present
+            def add_prefix:
+              if startswith("vacatia-") then . else "vacatia-" + . end;
+
+            # Transform packageDirectories
+            .packageDirectories = [.packageDirectories[] |
+              # Transform package name if present
+              (if .package then .package = (.package | add_prefix) else . end) |
+              # Transform dependencies if present
+              (if .dependencies then
+                .dependencies = [.dependencies[] |
+                  if .package then
+                    .package = (.package | split("@") | .[0] = (.[0] | add_prefix) | join("@"))
+                  else . end
+                ]
+              else . end)
+            ] |
+
+            # Transform packageAliases keys
+            .packageAliases = (
+              .packageAliases | to_entries | map(
+                # Split key by @ to handle versioned aliases
+                .key = (.key | split("@") | .[0] = (.[0] | add_prefix) | join("@"))
+              ) | from_entries
+            )
+          ' sfdx-project.json > sfdx-project.json.tmp && mv sfdx-project.json.tmp sfdx-project.json
+
+      - name: 'Commit transformed package names'
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.merge.outputs.merge_success == 'true'
+        run: |
+          # Check if there are changes to commit
+          if git diff --quiet sfdx-project.json; then
+            echo "No package name changes to commit"
+          else
+            git add sfdx-project.json
+            git commit -m "chore: prepend vacatia- prefix to package names after upstream sync"
+          fi
+
+      - name: 'Push changes'
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.merge.outputs.merge_success == 'true'
+        run: |
+          git push origin main
+
+      # Package build steps (from deploy.yml)
+      - name: 'Setup node'
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.merge.outputs.merge_success == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: 'Install NPM'
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.merge.outputs.merge_success == 'true'
+        run: npm ci
+
+      - name: 'Auth to dev hub'
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.merge.outputs.merge_success == 'true'
+        shell: bash
+        run: |
+          echo "${{ secrets.DEVHUB_SERVER_KEY }}" > ./jwt-server.key
+          npx sf org login jwt --client-id ${{ secrets.DEVHUB_CONSUMER_KEY }} --username ${{ secrets.DEVHUB_USERNAME }} --jwt-key-file ./jwt-server.key --set-default-dev-hub
+          npx sf config set target-org ${{ secrets.DEVHUB_USERNAME }}
+        env:
+          DEVHUB_USERNAME: ${{ secrets.DEVHUB_USERNAME }}
+          DEVHUB_CONSUMER_KEY: ${{ secrets.DEVHUB_CONSUMER_KEY }}
+          DEVHUB_SERVER_KEY: ${{ secrets.DEVHUB_SERVER_KEY }}
+
+      - name: 'Build Packages'
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.merge.outputs.merge_success == 'true'
+        shell: pwsh
+        run: |
+          echo y | npx sf plugins install @jongpie/sfdx-bummer-plugin
+          . ./scripts/build-and-promote-package.ps1
+
+      - name: 'Commit updated package versions'
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.merge.outputs.merge_success == 'true'
+        run: |
+          # Check if package build updated sfdx-project.json
+          if git diff --quiet sfdx-project.json package.json; then
+            echo "No package version changes to commit"
+          else
+            git add sfdx-project.json package.json || true
+            git commit -m "chore: update package versions after upstream sync build" || true
+            git push origin main
+          fi
