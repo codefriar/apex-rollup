@@ -6,6 +6,12 @@ global without sharing virtual class RollupLogger implements ILogger {
   private static final System.LoggingLevel FALLBACK_LOGGING_LEVEL = System.LoggingLevel.DEBUG;
   private static final RollupPlugin PLUGIN = new RollupPlugin();
 
+  global enum LoggingVerbosity {
+    NONE,
+    DIAGNOSTIC,
+    DEBUG
+  }
+
   private final System.LoggingLevel currentLoggingLevel;
 
   protected RollupLogger() {
@@ -31,6 +37,8 @@ global without sharing virtual class RollupLogger implements ILogger {
   global interface ILogger {
     void log(String logString, System.LoggingLevel logLevel);
     void log(String logString, Object logObject, System.LoggingLevel logLevel);
+    void logDiagnostic(String logString, System.LoggingLevel logLevel);
+    void logDiagnostic(String logString, Object logObject, System.LoggingLevel logLevel);
     void save();
     ILogger updateRollupControl(RollupControl__mdt control);
   }
@@ -40,6 +48,16 @@ global without sharing virtual class RollupLogger implements ILogger {
   }
 
   global virtual void log(String logString, Object logObject, System.LoggingLevel logLevel) {
+    if (logLevel.ordinal() >= this.currentLoggingLevel.ordinal()) {
+      this.innerLog(logString, logObject, logLevel);
+    }
+  }
+
+  public void logDiagnostic(String logString, System.LoggingLevel logLevel) {
+    this.logDiagnostic(logString, null, logLevel);
+  }
+
+  global virtual void logDiagnostic(String logString, Object logObject, System.LoggingLevel logLevel) {
     if (logLevel.ordinal() >= this.currentLoggingLevel.ordinal()) {
       this.innerLog(logString, logObject, logLevel);
     }
@@ -177,20 +195,50 @@ global without sharing virtual class RollupLogger implements ILogger {
     }
 
     public void log(String logString, Object logObject, System.LoggingLevel logLevel) {
-      if (this.control.IsRollupLoggingEnabled__c == false && this.hasDisabledMessageBeenLogged == false) {
+      LoggingVerbosity verbosity = this.getEffectiveVerbosity();
+      if (verbosity == LoggingVerbosity.NONE && this.hasDisabledMessageBeenLogged == false) {
         this.hasDisabledMessageBeenLogged = true;
-        this.control.IsRollupLoggingEnabled__c = true;
-        this.log('logging isn\'t enabled, further log messages paused unless otherwise re-activated', System.LoggingLevel.INFO);
-        this.control.IsRollupLoggingEnabled__c = false;
-      } else if (this.control.IsRollupLoggingEnabled__c) {
-        for (ILogger logger : this.loggers) {
-          logger.log(logString, logObject, logLevel);
-        }
+        this.innerLog('logging isn\'t enabled, further log messages paused unless otherwise re-activated', null, System.LoggingLevel.INFO);
+      } else if (verbosity == LoggingVerbosity.DEBUG) {
+        this.innerLog(logString, logObject, logLevel);
+      }
+      // If verbosity is DIAGNOSTIC, debug-level messages are suppressed
+    }
+
+    public void logDiagnostic(String logString, System.LoggingLevel logLevel) {
+      this.logDiagnostic(logString, null, logLevel);
+    }
+
+    public void logDiagnostic(String logString, Object logObject, System.LoggingLevel logLevel) {
+      LoggingVerbosity verbosity = this.getEffectiveVerbosity();
+      if (verbosity == LoggingVerbosity.DIAGNOSTIC || verbosity == LoggingVerbosity.DEBUG) {
+        this.innerLog(logString, logObject, logLevel);
       }
     }
 
+    private void innerLog(String logString, Object logObject, System.LoggingLevel logLevel) {
+      for (ILogger logger : this.loggers) {
+        logger.log(logString, logObject, logLevel);
+      }
+    }
+
+    private LoggingVerbosity getEffectiveVerbosity() {
+      String loggingLevel = this.control.RollupLoggingLevel__c;
+      if (String.isNotBlank(loggingLevel)) {
+        if (loggingLevel == RollupMetaPicklists.LoggingLevel.Debug) {
+          return LoggingVerbosity.DEBUG;
+        } else if (loggingLevel == RollupMetaPicklists.LoggingLevel.Diagnostic) {
+          return LoggingVerbosity.DIAGNOSTIC;
+        }
+        return LoggingVerbosity.NONE;
+      }
+      // Backward compatibility: use IsRollupLoggingEnabled__c when RollupLoggingLevel__c is not set
+      return this.control.IsRollupLoggingEnabled__c == true ? LoggingVerbosity.DEBUG : LoggingVerbosity.NONE;
+    }
+
     public void save() {
-      if (this.control.IsRollupLoggingEnabled__c != false) {
+      LoggingVerbosity verbosity = this.getEffectiveVerbosity();
+      if (verbosity != LoggingVerbosity.NONE) {
         for (ILogger logger : this.loggers) {
           logger.save();
         }
@@ -198,12 +246,18 @@ global without sharing virtual class RollupLogger implements ILogger {
     }
 
     public CombinedLogger updateRollupControl(RollupControl__mdt control) {
-      String updateMessage = 'updating control record';
-      if (control.IsRollupLoggingEnabled__c == true && this.control.IsRollupLoggingEnabled__c != true) {
-        updateMessage = 'logging is now re-enabled, ' + updateMessage;
-      }
+      LoggingVerbosity oldVerbosity = this.getEffectiveVerbosity();
       this.control = control;
-      this.log(updateMessage, control, System.LoggingLevel.INFO);
+      LoggingVerbosity newVerbosity = this.getEffectiveVerbosity();
+
+      String updateMessage = 'updating control record';
+      if (newVerbosity != LoggingVerbosity.NONE && oldVerbosity == LoggingVerbosity.NONE) {
+        updateMessage = 'logging is now re-enabled at ' + newVerbosity.name() + ' level, ' + updateMessage;
+        this.hasDisabledMessageBeenLogged = false;
+      } else if (newVerbosity != oldVerbosity) {
+        updateMessage = 'logging level changed from ' + oldVerbosity.name() + ' to ' + newVerbosity.name() + ', ' + updateMessage;
+      }
+      this.logDiagnostic(updateMessage, control, System.LoggingLevel.INFO);
       return this;
     }
   }
