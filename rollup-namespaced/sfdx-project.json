@@ -4,7 +4,7 @@
             "default": true,
             "package": "apex-rollup-namespaced",
             "path": "rollup-namespaced/source/rollup",
-            "versionName": "Use new Invocable Action Extensions to clean up and organize the Rollup flow invocable action menus",
+            "versionName": "Fix obscure DataWeave error by ensuring all Datetime strings are parsed correctly",
             "versionNumber": "1.2.30.0",
             "versionDescription": "Fast, configurable, elastically scaling custom rollup solution. Apex Invocable action, one-liner Apex trigger/CMDT-driven logic, and scheduled Apex-ready.",
             "releaseNotesUrl": "https://github.com/jamessimone/apex-rollup/releases/latest",
@@ -18,7 +18,7 @@
     ],
     "namespace": "please",
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "62.0",
+    "sourceApiVersion": "65.0",
     "packageAliases": {
         "apex-rollup-namespaced": "0Ho6g000000PBMjCAO",
         "apex-rollup-namespaced@1.2.4": "04t6g000008OfqYAAS",
@@ -46,6 +46,7 @@
         "apex-rollup-namespaced@1.2.26": "04tKf000000syDGIAY",
         "apex-rollup-namespaced@1.2.27": "04tKf000000syDkIAI",
         "apex-rollup-namespaced@1.2.28": "04tKf000000syDuIAI",
-        "apex-rollup-namespaced@1.2.29": "04tKf000000syE4IAI"
+        "apex-rollup-namespaced@1.2.29": "04tKf000000syE4IAI",
+        "apex-rollup-namespaced@1.2.30": "04tKf000000syGKIAY"
     }
 }
